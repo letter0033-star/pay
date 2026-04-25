@@ -10,7 +10,7 @@
 
         :root {
             --primary: #1e40af;
-            --border: #1e293b;
+            --border: #000000;
         }
 
         body {
@@ -39,6 +39,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 1rem;
+            table-layout: fixed;
         }
 
         th, td {
@@ -46,16 +47,16 @@
             padding: 6px 4px;
             text-align: center;
             line-height: 1.4;
+            word-break: break-all;
         }
 
-        /* 대상자/확인자 표 전용 스타일 */
         .info-table {
-            font-size: 11.5px;
+            font-size: 12px;
         }
         .info-table th {
             background-color: #f8fafc;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 13px;
             letter-spacing: 0.1em;
         }
         .info-table .label {
@@ -63,12 +64,11 @@
             font-weight: 600;
             width: 15%;
         }
-        .highlight-blue { color: #1e40af; font-weight: 800; font-size: 16px; }
-        .highlight-red { color: #dc2626; font-weight: 800; font-size: 14px; }
+        .highlight-blue { color: #1e40af; font-weight: 800; font-size: 18px; }
+        .highlight-red { color: #dc2626; font-weight: 800; font-size: 16px; }
 
         .career-table {
-            font-size: 9px; 
-            table-layout: fixed;
+            font-size: 10px; 
         }
         .career-table th { padding: 4px 2px; background-color: #f8fafc; }
 
@@ -81,25 +81,17 @@
             transition: all 0.2s;
         }
 
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1);
-        }
-
         .career-row-input {
             border: none !important;
             background: transparent !important;
-            padding: 1px !important;
+            padding: 0 !important;
             text-align: center;
             font-size: 9px;
             width: 100%;
-        }
-
-        .rate-input {
-            font-size: 9px !important;
-            font-weight: 700;
-            color: #1e40af;
+            height: 100%;
+            display: block;
+            appearance: none;
+            -webkit-appearance: none;
         }
 
         @media print {
@@ -111,6 +103,15 @@
                 width: 100%; 
                 padding: 10mm;
             }
+            .col-note { width: 10% !important; }
+            .col-delete { display: none !important; }
+            
+            input[type="date"]::-webkit-inner-spin-button,
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                display: none;
+                -webkit-appearance: none;
+            }
+            
             @page { size: A4; margin: 0; }
         }
     </style>
@@ -118,7 +119,7 @@
 <body>
 
 <div class="flex min-h-screen">
-    <!-- Sidebar (UI 생략 - 기존과 동일하게 유지됨) -->
+    <!-- Sidebar -->
     <aside class="w-80 sidebar no-print p-5 h-screen overflow-y-auto sticky top-0">
         <div class="flex items-center gap-2 mb-6">
             <div class="bg-blue-700 p-2 rounded-lg">
@@ -215,81 +216,80 @@
                 <span class="text-[11px] font-medium">획정기준일: <span id="out-date" class="font-bold border-b-2 border-black px-1"></span></span>
             </div>
 
-            <!-- 시인성이 개선된 대상자 및 확인자 정보 표 -->
             <table class="info-table">
                 <colgroup>
                     <col width="10%"><col width="15%"><col width="30%"><col width="15%"><col width="15%"><col width="15%">
                 </colgroup>
                 <tr>
-                    <th rowspan="5">대<br>상<br>자</th>
+                    <th rowspan="5" class="bg-slate-100">대<br>상<br>자</th>
                     <td class="label">소 속</td>
-                    <td id="out-dept" class="text-left px-3 font-bold text-[13px]"></td>
+                    <td id="out-dept" class="text-left px-3 font-bold text-[14px]"></td>
                     <td class="label">획정 호봉</td>
                     <td colspan="2" id="out-final" class="highlight-blue bg-blue-50/50"></td>
                 </tr>
                 <tr>
                     <td class="label">성 명</td>
-                    <td class="text-left px-3 font-bold text-[14px]">
+                    <td class="text-left px-3 font-bold text-[15px]">
                         <span id="out-name"></span>
                         <span class="float-right text-[10px] font-normal text-slate-500 mt-1">(인 또는 서명)</span>
                     </td>
                     <td class="label">기산 호봉</td>
-                    <td colspan="2" id="out-cert-val" class="font-bold"></td>
+                    <td colspan="2" id="out-cert-val" class="font-bold text-[13px]"></td>
                 </tr>
                 <tr>
                     <td class="label">자 격</td>
-                    <td id="out-cert-text" class="text-left px-3"></td>
+                    <td id="out-cert-text" class="text-left px-3 font-medium"></td>
                     <td class="label">학령가감</td>
-                    <td colspan="2" id="out-edu-val" class="font-bold"></td>
+                    <td colspan="2" id="out-edu-val" class="font-bold text-[13px]"></td>
                 </tr>
                 <tr>
                     <td class="label">학 령</td>
-                    <td id="out-edu-text" class="text-left px-3"></td>
+                    <td id="out-edu-text" class="text-left px-3 font-medium"></td>
                     <td class="label">사범가산</td>
-                    <td colspan="2" id="out-plus-val" class="font-bold"></td>
+                    <td colspan="2" id="out-plus-val" class="font-bold text-[13px]"></td>
                 </tr>
                 <tr>
                     <td class="label">비 고</td>
-                    <td id="out-note" class="text-left px-3 text-[10px] text-slate-600 italic"></td>
+                    <td id="out-note" class="text-left px-3 text-[11px] text-slate-600"></td>
                     <td class="label">경력 년수</td>
-                    <td colspan="2" id="out-career-sum" class="font-bold text-[13px]"></td>
+                    <td colspan="2" id="out-career-sum" class="font-bold text-[14px]"></td>
                 </tr>
                 <tr class="border-t-2 border-black">
-                    <th rowspan="2">확<br>인<br>자</th>
+                    <th rowspan="2" class="bg-slate-100">확<br>인<br>자</th>
                     <td class="label">직 위</td>
-                    <td class="text-left px-3 font-medium">인사담당자</td>
+                    <td class="text-left px-3 font-bold text-[14px]">교 감</td>
                     <td class="label">잔여 월/일</td>
                     <td colspan="2" id="out-rem" class="highlight-red bg-red-50/30"></td>
                 </tr>
                 <tr>
                     <td class="label">성 명</td>
                     <td class="text-left px-3">
-                        <span class="font-bold">김철수</span>
+                        <span class="font-bold text-[15px]">이명수</span>
                         <span class="float-right text-[10px] text-slate-400 mt-1">(인)</span>
                     </td>
                     <td class="label">차기 승급일</td>
-                    <td colspan="2" id="out-next-table" class="font-bold text-blue-700 text-[13px] tracking-tight"></td>
+                    <td colspan="2" id="out-next-table" class="font-bold text-blue-700 text-[14px] tracking-tight"></td>
                 </tr>
             </table>
 
             <div class="mt-8 mb-2 flex items-center justify-between">
                 <div class="flex items-center gap-1.5">
                     <div class="w-1.5 h-4 bg-slate-800"></div>
-                    <span class="text-[12px] font-bold">근무 경력 내역 (V3.8 역법 계산)</span>
+                    <span class="text-[12px] font-bold">근무 경력 내역</span>
                 </div>
                 <button onclick="addCareer()" class="no-print text-[11px] bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200 font-bold hover:bg-blue-100">+ 경력 추가</button>
             </div>
 
             <table class="career-table">
                 <colgroup>
-                    <col width="14%"><col width="14%"><col width="24%">
+                    <col width="15%"><col width="15%"><col width="20%">
                     <col width="5%"><col width="5%"><col width="5%">
-                    <col width="4%"> 
+                    <col width="5%"> 
                     <col width="5%"><col width="5%"><col width="5%">
-                    <col width="10%">
-                    <col width="4%" class="no-print">
+                    <col width="10%" class="col-note">
+                    <col width="5%" class="no-print col-delete">
                 </colgroup>
-                <thead class="text-[9px]">
+                <thead>
                     <tr>
                         <th rowspan="2">시작일</th>
                         <th rowspan="2">종료일</th>
@@ -308,11 +308,12 @@
                 <tbody id="career-body"></tbody>
                 <tfoot class="bg-slate-50 font-bold">
                     <tr>
-                        <td colspan="7" class="text-right px-4 text-[9px]">환산 경력 합계 (연월일 개별 환산 후 합산)</td>
+                        <td colspan="7" class="text-right px-4 text-[10px]">환산 경력 합계</td>
                         <td id="total-y">0</td>
                         <td id="total-m">0</td>
                         <td id="total-d">0</td>
-                        <td colspan="2"></td>
+                        <td colspan="1" class="col-note"></td>
+                        <td class="no-print col-delete"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -366,42 +367,60 @@
             tr.innerHTML = `
                 <td class="p-0"><input type="date" class="career-row-input" value="${c.s}" onchange="edit(${i},'s',this.value)"></td>
                 <td class="p-0"><input type="date" class="career-row-input" value="${c.e}" onchange="edit(${i},'e',this.value)"></td>
-                <td class="p-0"><input type="text" class="career-row-input px-1 text-left" value="${c.n}" oninput="edit(${i},'n',this.value)"></td>
+                <td class="p-0"><input type="text" class="career-row-input px-1 text-left" style="font-size:10px;" value="${c.n}" oninput="edit(${i},'n',this.value)"></td>
                 <td id="raw-y-${i}" class="bg-gray-50/50">0</td>
                 <td id="raw-m-${i}" class="bg-gray-50/50">0</td>
                 <td id="raw-d-${i}" class="bg-gray-50/50">0</td>
-                <td class="p-0"><input type="text" class="career-row-input rate-input" value="${c.r}" oninput="edit(${i},'r',this.value)"></td>
+                <td class="p-0"><input type="text" class="career-row-input font-bold" style="font-size:10px;" value="${c.r}" oninput="edit(${i},'r',this.value)"></td>
                 <td id="row-y-${i}" class="font-bold">0</td>
                 <td id="row-m-${i}" class="font-bold">0</td>
                 <td id="row-d-${i}" class="font-bold">0</td>
-                <td class="p-0"><input type="text" class="career-row-input px-1 text-left" value="${c.note || ''}" oninput="edit(${i},'note',this.value)"></td>
-                <td class="no-print p-0"><button onclick="removeCareer(${i})" class="w-full h-full text-red-400 hover:text-red-600">✕</button></td>
+                <td class="p-0 col-note"><input type="text" class="career-row-input px-1 text-left" style="font-size:10px;" value="${c.note || ''}" oninput="edit(${i},'note',this.value)"></td>
+                <td class="no-print p-0 col-delete"><button onclick="removeCareer(${i})" class="w-full h-full text-red-400 hover:text-red-600">✕</button></td>
             `;
             body.appendChild(tr);
         });
     }
 
+    /**
+     * 공무원 경력 획정 날짜 계산 로직 (연, 월, 일 단위 정밀 계산)
+     */
     function calcV38(sStr, eStr) {
         if(!sStr || !eStr) return {y:0, m:0, d:0};
         let start = new Date(sStr);
         let end = new Date(eStr);
         if(start > end) return {y:0, m:0, d:0};
         
-        let target = new Date(end.getTime() + 86400000);
+        // 종료일에 1일을 더함 (공무원 경력 계산 원칙: 시작일~종료일 모두 포함)
+        let target = new Date(end.getTime());
+        target.setDate(target.getDate() + 1);
+        
         let curr = new Date(start);
         let yy = 0, mm = 0, dd = 0;
         
+        // 1. 연 단위 계산
         while(true) {
-            let n = new Date(curr);
-            n.setFullYear(curr.getFullYear() + 1);
-            if(n <= target) { curr = n; yy++; } else break;
+            let nextYear = new Date(curr);
+            nextYear.setFullYear(curr.getFullYear() + 1);
+            if(nextYear <= target) {
+                curr = nextYear;
+                yy++;
+            } else break;
         }
+        
+        // 2. 월 단위 계산
         while(true) {
-            let n = new Date(curr);
-            n.setMonth(curr.getMonth() + 1);
-            if(n <= target) { curr = n; mm++; } else break;
+            let nextMonth = new Date(curr);
+            nextMonth.setMonth(curr.getMonth() + 1);
+            if(nextMonth <= target) {
+                curr = nextMonth;
+                mm++;
+            } else break;
         }
-        dd = Math.round((target.getTime() - curr.getTime()) / 86400000);
+        
+        // 3. 일 단위 계산
+        dd = Math.round((target.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24));
+        
         return {y:yy, m:mm, d:dd};
     }
 
@@ -434,7 +453,8 @@
         const plus = document.getElementById('in-plus').checked ? 1 : 0;
         document.getElementById('out-plus-val').innerText = (plus >= 0 ? "+" : "") + plus;
 
-        let ty = 0, tm = 0, td = 0;
+        let totalY = 0, totalM = 0, totalD = 0;
+        
         careers.forEach((c, i) => {
             const raw = calcV38(c.s, c.e);
             document.getElementById(`raw-y-${i}`).innerText = raw.y;
@@ -442,32 +462,47 @@
             document.getElementById(`raw-d-${i}`).innerText = raw.d;
 
             const rate = (parseFloat(c.r) || 0) / 100;
-            let totalDays = Math.floor(((raw.y * 360) + (raw.m * 30) + raw.d) * rate);
-            let y = Math.floor(totalDays / 360);
-            let m = Math.floor((totalDays % 360) / 30);
-            let d = totalDays % 30;
+            
+            // 각 행별 환산 처리 (총 일수를 구한 뒤 비율을 곱함)
+            // 지침상 30일=1월, 12월=1년 기준
+            let rawTotalDays = (raw.y * 360) + (raw.m * 30) + raw.d;
+            let convTotalDays = Math.floor(rawTotalDays * rate);
+            
+            let y = Math.floor(convTotalDays / 360);
+            let m = Math.floor((convTotalDays % 360) / 30);
+            let d = convTotalDays % 30;
 
             document.getElementById(`row-y-${i}`).innerText = y;
             document.getElementById(`row-m-${i}`).innerText = m;
             document.getElementById(`row-d-${i}`).innerText = d;
-            ty += y; tm += m; td += d;
+            
+            totalY += y;
+            totalM += m;
+            totalD += d;
         });
 
-        tm += Math.floor(td / 30); td %= 30;
-        ty += Math.floor(tm / 12); tm %= 12;
+        // 합산 후 단위 변환
+        totalM += Math.floor(totalD / 30);
+        totalD = totalD % 30;
+        totalY += Math.floor(totalM / 12);
+        totalM = totalM % 12;
 
-        document.getElementById('total-y').innerText = ty;
-        document.getElementById('total-m').innerText = tm;
-        document.getElementById('total-d').innerText = td;
-        document.getElementById('out-career-sum').innerText = ty + "년 " + tm + "월 " + td + "일";
-        document.getElementById('out-rem').innerText = tm + "월 " + td + "일";
+        document.getElementById('total-y').innerText = totalY;
+        document.getElementById('total-m').innerText = totalM;
+        document.getElementById('total-d').innerText = totalD;
+        
+        document.getElementById('out-career-sum').innerText = totalY + "년 " + totalM + "월 " + totalD + "일";
+        document.getElementById('out-rem').innerText = totalM + "월 " + totalD + "일";
 
-        const finalStep = cStep + eAdj + plus + ty;
-        document.getElementById('out-final').innerText = (finalStep > 40 ? 40 : finalStep) + " 호봉";
+        const finalStep = cStep + eAdj + plus + totalY;
+        const displayStep = finalStep > 40 ? 40 : finalStep;
+        document.getElementById('out-final').innerText = displayStep + " 호봉";
 
         if(bDate) {
             let next = new Date(bDate);
-            next.setMonth(next.getMonth() + (12 - tm));
+            // 잔여 경력이 0일 경우 다음해 같은 달 1일, 아닐 경우 남은 월수만큼 조정
+            let monthsToNext = 12 - totalM;
+            next.setMonth(next.getMonth() + monthsToNext);
             next.setDate(1); 
             const formattedNext = next.getFullYear() + "년 " + String(next.getMonth() + 1).padStart(2,'0') + "월 01일";
             document.getElementById('out-next-table').innerText = formattedNext;
