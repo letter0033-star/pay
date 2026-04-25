@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>호봉획정 Pro V3.8</title>
+    <title>호봉획정프로그램 V3.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
@@ -127,7 +127,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
             </div>
-            <h1 class="text-lg font-bold text-slate-800">호봉획정 Pro V3.8</h1>
+            <h1 class="text-lg font-bold text-slate-800">호봉획정프로그램 V3.8</h1>
         </div>
 
         <div class="space-y-5">
@@ -159,11 +159,10 @@
                 </div>
                 <div>
                     <label class="text-[11px] font-semibold text-slate-600 mb-1 block">획정 기준일</label>
-                    <input type="date" id="in-date" onchange="update()">
+                    <input type="date" id="in-date" value="2026-04-25" onchange="update()">
                 </div>
             </section>
 
-            <!-- 확인자 설정 영역: 성명 기본값 000 적용 -->
             <section class="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">확인자 설정</h3>
                 <div class="grid grid-cols-2 gap-2">
@@ -344,14 +343,13 @@
 
 <script>
     let careers = [
-        { s: '2020-03-01', e: '2022-02-28', n: '정교사 경력', r: '100', note: '공립학교' },
-        { s: '2022-03-01', e: '2024-02-29', n: '임용 전 계약제교원', r: '100', note: '기간제' }
+        { s: '2024-03-01', e: '2025-02-28', n: '정교사 경력', r: '100', note: '공립학교' },
+        { s: '2025-03-01', e: '2026-02-28', n: '계약제교원 경력', r: '100', note: '기간제' }
     ];
 
     function init() {
-        const today = new Date();
-        document.getElementById('in-date').value = today.toISOString().split('T')[0];
-        document.getElementById('footer-today').innerText = today.getFullYear() + '년 ' + (today.getMonth() + 1) + '월 ' + today.getDate() + '일';
+        const fixedDate = new Date("2026-04-25");
+        document.getElementById('footer-today').innerText = fixedDate.getFullYear() + '년 ' + (fixedDate.getMonth() + 1) + '월 ' + fixedDate.getDate() + '일';
         renderCareers();
         update();
     }
