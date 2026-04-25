@@ -163,6 +163,7 @@
                 </div>
             </section>
 
+            <!-- 확인자 설정 영역: 성명 기본값 000 적용 -->
             <section class="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">확인자 설정</h3>
                 <div class="grid grid-cols-2 gap-2">
@@ -172,7 +173,7 @@
                     </div>
                     <div>
                         <label class="text-[11px] font-semibold text-slate-600 mb-1 block">성명</label>
-                        <input type="text" id="in-verifier-name" value="이명수" oninput="update()">
+                        <input type="text" id="in-verifier-name" value="000" oninput="update()">
                     </div>
                 </div>
             </section>
@@ -396,9 +397,6 @@
         });
     }
 
-    /**
-     * 공무원 경력 획정 날짜 계산 로직 (연, 월, 일 단위 정밀 계산)
-     */
     function calcV38(sStr, eStr) {
         if(!sStr || !eStr) return {y:0, m:0, d:0};
         let start = new Date(sStr);
@@ -447,7 +445,6 @@
         document.getElementById('out-name').innerText = document.getElementById('in-name').value;
         document.getElementById('out-note').innerText = document.getElementById('in-note').value;
         
-        // 확인자 업데이트
         document.getElementById('out-verifier-rank').innerText = document.getElementById('in-verifier-rank').value;
         document.getElementById('out-verifier-name').innerText = document.getElementById('in-verifier-name').value;
 
