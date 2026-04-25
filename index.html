@@ -163,6 +163,20 @@
                 </div>
             </section>
 
+            <section class="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">확인자 설정</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 mb-1 block">직위</label>
+                        <input type="text" id="in-verifier-rank" value="교 감" oninput="update()">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-semibold text-slate-600 mb-1 block">성명</label>
+                        <input type="text" id="in-verifier-name" value="이명수" oninput="update()">
+                    </div>
+                </div>
+            </section>
+
             <section class="space-y-3">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">획정 요소</h3>
                 <div>
@@ -257,14 +271,14 @@
                 <tr class="border-t-2 border-black">
                     <th rowspan="2" class="bg-slate-100">확<br>인<br>자</th>
                     <td class="label">직 위</td>
-                    <td class="text-left px-3 font-bold text-[14px]">교 감</td>
+                    <td id="out-verifier-rank" class="text-left px-3 font-bold text-[14px]"></td>
                     <td class="label">잔여 월/일</td>
                     <td colspan="2" id="out-rem" class="highlight-red bg-red-50/30"></td>
                 </tr>
                 <tr>
                     <td class="label">성 명</td>
                     <td class="text-left px-3">
-                        <span class="font-bold text-[15px]">이명수</span>
+                        <span id="out-verifier-name" class="font-bold text-[15px]"></span>
                         <span class="float-right text-[10px] text-slate-400 mt-1">(인)</span>
                     </td>
                     <td class="label">차기 승급일</td>
@@ -391,14 +405,12 @@
         let end = new Date(eStr);
         if(start > end) return {y:0, m:0, d:0};
         
-        // 종료일에 1일을 더함 (공무원 경력 계산 원칙: 시작일~종료일 모두 포함)
         let target = new Date(end.getTime());
         target.setDate(target.getDate() + 1);
         
         let curr = new Date(start);
         let yy = 0, mm = 0, dd = 0;
         
-        // 1. 연 단위 계산
         while(true) {
             let nextYear = new Date(curr);
             nextYear.setFullYear(curr.getFullYear() + 1);
@@ -408,7 +420,6 @@
             } else break;
         }
         
-        // 2. 월 단위 계산
         while(true) {
             let nextMonth = new Date(curr);
             nextMonth.setMonth(curr.getMonth() + 1);
@@ -418,7 +429,6 @@
             } else break;
         }
         
-        // 3. 일 단위 계산
         dd = Math.round((target.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24));
         
         return {y:yy, m:mm, d:dd};
@@ -437,6 +447,10 @@
         document.getElementById('out-name').innerText = document.getElementById('in-name').value;
         document.getElementById('out-note').innerText = document.getElementById('in-note').value;
         
+        // 확인자 업데이트
+        document.getElementById('out-verifier-rank').innerText = document.getElementById('in-verifier-rank').value;
+        document.getElementById('out-verifier-name').innerText = document.getElementById('in-verifier-name').value;
+
         const bDate = document.getElementById('in-date').value;
         document.getElementById('out-date').innerText = bDate;
         
@@ -463,8 +477,6 @@
 
             const rate = (parseFloat(c.r) || 0) / 100;
             
-            // 각 행별 환산 처리 (총 일수를 구한 뒤 비율을 곱함)
-            // 지침상 30일=1월, 12월=1년 기준
             let rawTotalDays = (raw.y * 360) + (raw.m * 30) + raw.d;
             let convTotalDays = Math.floor(rawTotalDays * rate);
             
@@ -481,7 +493,6 @@
             totalD += d;
         });
 
-        // 합산 후 단위 변환
         totalM += Math.floor(totalD / 30);
         totalD = totalD % 30;
         totalY += Math.floor(totalM / 12);
@@ -500,7 +511,6 @@
 
         if(bDate) {
             let next = new Date(bDate);
-            // 잔여 경력이 0일 경우 다음해 같은 달 1일, 아닐 경우 남은 월수만큼 조정
             let monthsToNext = 12 - totalM;
             next.setMonth(next.getMonth() + monthsToNext);
             next.setDate(1); 
