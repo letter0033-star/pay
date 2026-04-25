@@ -4,422 +4,332 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>교육공무원 호봉획정 프로그램</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 외부 의존성을 줄이기 위해 핵심 스타일을 내부에 포함 -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
         
-        :root {
-            --print-width: 210mm;
-            --print-height: 297mm;
-        }
-
-        body { 
-            font-family: 'Noto Sans KR', sans-serif; 
-            background-color: #f3f4f6; 
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
-            padding: 0;
+            padding: 20px;
+            color: #333;
         }
 
-        /* 인쇄 전용 설정 */
-        @media print {
-            body { background-color: white; }
-            .no-print { display: none !important; }
-            .print-area { 
-                box-shadow: none !important; 
-                margin: 0 !important; 
-                padding: 10mm !important;
-                width: 100% !important;
-                min-height: auto !important;
-            }
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            table { page-break-inside: auto; }
-            tr { page-break-inside: avoid; page-break-after: auto; }
+        /* 메인 컨테이너 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
         }
 
-        .print-area { 
-            background: white; 
-            width: var(--print-width); 
-            min-height: var(--print-height); 
-            padding: 20mm; 
-            margin: 20px auto; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+        /* 입력창 스타일 */
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             box-sizing: border-box;
         }
 
-        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        th, td { 
-            border: 1px solid #000; 
-            padding: 6px 4px; 
-            text-align: center; 
-            word-break: break-all;
-            font-size: 11px;
-            line-height: 1.2;
+        /* 프리뷰(A4) 영역 */
+        .preview-card {
+            background: white;
+            padding: 15mm;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            min-height: 297mm;
+            box-sizing: border-box;
         }
-        .bg-gray-50 { background-color: #f9fafb !important; -webkit-print-color-adjust: exact; }
-        .bg-blue-50 { background-color: #eff6ff !important; -webkit-print-color-adjust: exact; }
+
+        /* 표 스타일 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 12px;
+            overflow: hidden;
+        }
+        .bg-light { background-color: #f9f9f9; }
         
-        .no-border-input { border: none; width: 100%; text-align: center; outline: none; background: transparent; font-family: inherit; }
-        
-        /* 제목 데코레이션 */
+        .btn-print {
+            width: 100%;
+            padding: 15px;
+            background: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-print:hover { background: #004494; }
+
+        .career-input {
+            border: none;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            background: transparent;
+        }
+
+        /* 인쇄 시 설정 */
+        @media print {
+            body { background: white; padding: 0; }
+            .sidebar, .no-print { display: none !important; }
+            .container { display: block; }
+            .preview-card { 
+                box-shadow: none; 
+                margin: 0; 
+                width: 100%; 
+                padding: 10mm;
+            }
+            .career-input { border: none; }
+            @page { size: A4; margin: 0; }
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .preview-card { padding: 5mm; min-height: auto; width: 100%; overflow-x: auto; }
+        }
+
         .doc-title {
+            text-align: center;
             font-size: 24px;
-            font-weight: 800;
+            font-weight: bold;
             text-decoration: underline;
-            text-underline-offset: 8px;
             margin-bottom: 30px;
         }
     </style>
 </head>
-<body class="p-0 md:p-4">
-    <!-- 사이드바/입력창 (인쇄 시 숨김) -->
-    <div class="max-w-7xl mx-auto no-print mb-8">
-        <header class="py-6 text-center">
-            <h1 class="text-3xl font-bold text-gray-800">교육공무원 호봉획정 프로그램</h1>
-            <p class="text-gray-500 mt-2">정확한 PDF 저장을 위해 하단의 '인쇄 및 PDF 저장' 버튼을 이용해 주세요.</p>
-        </header>
+<body>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- 입력 섹션 -->
-            <div class="lg:col-span-1 space-y-4">
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                    <h2 class="font-bold text-blue-600 mb-4 flex items-center">
-                        <span class="mr-2">📋</span> 기본 정보 입력
-                    </h2>
-                    <div class="space-y-3 text-sm">
-                        <div>
-                            <label class="font-medium">소속 교육청/학교</label>
-                            <input type="text" id="input-dept" class="w-full mt-1 p-2 border rounded" placeholder="강원특별자치도교육청">
-                        </div>
-                        <div>
-                            <label class="font-medium">성명</label>
-                            <input type="text" id="input-name" class="w-full mt-1 p-2 border rounded" placeholder="홍길동">
-                        </div>
-                        <div>
-                            <label class="font-medium">자격</label>
-                            <select id="input-cert" class="w-full mt-1 p-2 border rounded">
-                                <option value="9">정교사(1급) - 9호봉</option>
-                                <option value="8">정교사(2급) - 8호봉</option>
-                                <option value="9">교감/원감 - 9호봉</option>
-                                <option value="9">교장/원장 - 9호봉</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="font-medium">학령 (최종학력)</label>
-                            <select id="input-edu" class="w-full mt-1 p-2 border rounded">
-                                <option value="0">대학교(4년제) [0]</option>
-                                <option value="1">대학교(5년제) [+1]</option>
-                                <option value="2">대학교(6년제) [+2]</option>
-                                <option value="-1">전문대(3년제) [-1]</option>
-                                <option value="-2">전문대(2년제) [-2]</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center py-2">
-                            <input type="checkbox" id="input-is-edu-college" class="w-4 h-4 mr-2">
-                            <label for="input-is-edu-college">사범계 학교 졸업 (+1)</label>
-                        </div>
-                        <div>
-                            <label class="font-medium">획정 기준일</label>
-                            <input type="date" id="input-base-date" class="w-full mt-1 p-2 border rounded">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-blue-600 p-5 rounded-xl shadow-lg text-white">
-                    <button onclick="window.print()" class="w-full bg-white text-blue-600 font-bold py-3 rounded-lg hover:bg-blue-50 transition shadow-md">
-                        🖨️ 인쇄 및 PDF 저장
-                    </button>
-                    <p class="text-[11px] mt-3 opacity-90 leading-relaxed">
-                        * 버튼 클릭 후 인쇄창에서 <b>'PDF로 저장'</b>을 선택하시면 가장 깔끔한 결과물을 얻으실 수 있습니다.
-                    </p>
-                </div>
-            </div>
-
-            <!-- 미리보기 섹션 (실제 출력물과 거의 동일) -->
-            <div class="lg:col-span-3">
-                <div class="print-area" id="print-content">
-                    <div class="text-center doc-title">교 육 공 무 원 호 봉 획 정 표</div>
-                    
-                    <div class="flex justify-between mb-2 text-[12px]">
-                        <span>( <span id="view-dept-display">강원특별자치도교육청</span> )</span>
-                    </div>
-
-                    <table class="mb-6">
-                        <colgroup>
-                            <col style="width: 10%">
-                            <col style="width: 12%">
-                            <col style="width: 28%">
-                            <col style="width: 15%">
-                            <col style="width: 15%">
-                            <col style="width: 20%">
-                        </colgroup>
-                        <tr>
-                            <td rowspan="3" class="bg-gray-50 font-bold">대상자</td>
-                            <td class="bg-gray-50">소속</td>
-                            <td id="view-dept" class="text-left font-medium"></td>
-                            <td class="bg-gray-50">획정기준일</td>
-                            <td colspan="2" id="view-base-date" class="font-bold"></td>
-                        </tr>
-                        <tr>
-                            <td class="bg-gray-50">성명</td>
-                            <td><span id="view-name" class="font-bold underline px-2"></span> (인)</td>
-                            <td class="bg-gray-50 font-bold text-blue-800">획정 호봉</td>
-                            <td colspan="2" id="view-final-step" class="font-bold text-[16px] text-blue-800"></td>
-                        </tr>
-                        <tr>
-                            <td class="bg-gray-50">자격</td>
-                            <td id="view-cert"></td>
-                            <td class="bg-gray-50">기산 호봉</td>
-                            <td colspan="2" id="view-start-step"></td>
-                        </tr>
-                        <tr>
-                            <td rowspan="2" class="bg-gray-50 font-bold">학령</td>
-                            <td colspan="2" id="view-edu" class="text-left px-4"></td>
-                            <td class="bg-gray-50">가감 년수</td>
-                            <td colspan="2" id="view-edu-adjust"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" id="view-is-edu-college" class="text-left px-4 italic"></td>
-                            <td class="bg-gray-50">가산 년수</td>
-                            <td colspan="2" id="view-edu-plus"></td>
-                        </tr>
-                        <tr>
-                            <td class="bg-gray-50 font-bold">확인자</td>
-                            <td colspan="2" class="text-left text-gray-400">직: _________ 성명: _________ (인)</td>
-                            <td class="bg-gray-50 font-bold">경력년수(환산)</td>
-                            <td id="view-career-y" class="font-bold"></td>
-                            <td id="view-career-md" class="text-[10px]"></td>
-                        </tr>
-                    </table>
-
-                    <div class="font-bold text-sm mb-2 flex items-center">
-                        <div class="w-1 h-4 bg-black mr-2"></div> 근무 경력 상세 내역
-                    </div>
-                    <table id="career-table">
-                        <colgroup>
-                            <col style="width: 15%">
-                            <col style="width: 15%">
-                            <col style="width: 30%">
-                            <col style="width: 10%">
-                            <col style="width: 10%">
-                            <col style="width: 10%">
-                            <col style="width: 10%">
-                        </colgroup>
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th colspan="2">근무 기간</th>
-                                <th rowspan="2">기관 및 직위</th>
-                                <th rowspan="2">환산율</th>
-                                <th colspan="3">환산 경력</th>
-                            </tr>
-                            <tr>
-                                <th>시작일</th>
-                                <th>종료일</th>
-                                <th>년</th>
-                                <th>월</th>
-                                <th>일</th>
-                            </tr>
-                        </thead>
-                        <tbody id="career-body">
-                            <!-- 로직으로 생성 -->
-                        </tbody>
-                        <tfoot class="bg-blue-50 font-bold">
-                            <tr>
-                                <td colspan="4">환산 경력 합계</td>
-                                <td id="total-y">0</td>
-                                <td id="total-m">0</td>
-                                <td id="total-d">0</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                    
-                    <div class="mt-8 grid grid-cols-2 gap-4">
-                        <div class="border-2 border-black p-4 rounded text-center">
-                            <div class="text-[11px] text-gray-500 mb-1">잔여 월/일</div>
-                            <div id="view-rem-period" class="font-bold text-lg">0월 0일</div>
-                        </div>
-                        <div class="border-2 border-blue-600 p-4 rounded text-center">
-                            <div class="text-[11px] text-blue-500 mb-1">차기 승급일</div>
-                            <div id="view-next-date" class="font-bold text-lg text-blue-600"></div>
-                        </div>
-                    </div>
-
-                    <div class="mt-20 text-center space-y-1">
-                        <p class="text-sm font-bold">위와 같이 호봉을 획정함</p>
-                        <p class="text-sm" id="today-display"></p>
-                        <p class="text-lg font-extrabold mt-4" id="view-dept-footer"></p>
-                    </div>
-                </div>
-            </div>
+<div class="container">
+    <!-- 입력 사이드바 -->
+    <div class="sidebar no-print">
+        <h2 style="margin-top:0">설정</h2>
+        <div class="input-group">
+            <label>기관명</label>
+            <input type="text" id="in-dept" value="강원특별자치도교육청" oninput="update()">
         </div>
+        <div class="input-group">
+            <label>성명</label>
+            <input type="text" id="in-name" value="홍길동" oninput="update()">
+        </div>
+        <div class="input-group">
+            <label>기산호봉 (자격)</label>
+            <select id="in-cert" onchange="update()">
+                <option value="9">1급 정교사 (9호봉)</option>
+                <option value="8">2급 정교사 (8호봉)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>학령 가감</label>
+            <input type="number" id="in-edu" value="0" oninput="update()">
+        </div>
+        <div class="input-group" style="display:flex; align-items:center;">
+            <input type="checkbox" id="in-plus" onchange="update()" checked style="width:auto; margin-right:8px;">
+            <label style="margin:0">사범계 가산(+1)</label>
+        </div>
+        <div class="input-group">
+            <label>획정 기준일</label>
+            <input type="date" id="in-date" onchange="update()">
+        </div>
+
+        <button class="btn-print" onclick="window.print()">PDF 저장 / 인쇄</button>
+        <p style="font-size:11px; color:#666; margin-top:10px; line-height:1.4;">
+            ※ 인쇄 창이 뜨면 '대상'을 <b>[PDF로 저장]</b>으로 선택하세요. 레이아웃이 깨지지 않습니다.
+        </p>
     </div>
 
-    <script>
-        const state = {
-            dept: '',
-            name: '',
-            certStep: 9,
-            eduAdjust: 0,
-            isEduCollege: false,
-            baseDate: new Date().toISOString().split('T')[0],
-            careers: [
-                { start: '', end: '', org: '', rate: 100 }
-            ]
-        };
+    <!-- 출력 문서 영역 -->
+    <div class="preview-card" id="document">
+        <div class="doc-title">교 육 공 무 원 호 봉 획 정 표</div>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:13px;">
+            <span>( <span id="out-dept-sub">강원특별자치도교육청</span> )</span>
+            <span>획정기준일: <b id="out-date"></b></span>
+        </div>
 
-        function init() {
-            document.getElementById('input-base-date').value = state.baseDate;
-            document.getElementById('today-display').innerText = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-            renderCareerRows();
-            attachEventListeners();
-            calculate();
-        }
+        <table>
+            <colgroup>
+                <col style="width:15%">
+                <col style="width:35%">
+                <col style="width:15%">
+                <col style="width:35%">
+            </colgroup>
+            <tr>
+                <td class="bg-light">성명</td>
+                <td><b id="out-name"></b> (인)</td>
+                <td class="bg-light">최종 호봉</td>
+                <td><b id="out-final" style="font-size:16px; color:#0056b3;">-</b></td>
+            </tr>
+            <tr>
+                <td class="bg-light">기산호봉</td>
+                <td id="out-cert">-</td>
+                <td class="bg-light">학령가감</td>
+                <td id="out-edu">-</td>
+            </tr>
+            <tr>
+                <td class="bg-light">사범가산</td>
+                <td id="out-plus">-</td>
+                <td class="bg-light">경력환산</td>
+                <td id="out-career">-</td>
+            </tr>
+        </table>
 
-        function attachEventListeners() {
-            const inputs = ['input-dept', 'input-name', 'input-cert', 'input-edu', 'input-is-edu-college', 'input-base-date'];
-            inputs.forEach(id => {
-                document.getElementById(id).addEventListener('input', (e) => {
-                    const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-                    const key = id.replace('input-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-                    
-                    if (id === 'input-cert' || id === 'input-edu') {
-                        state[key] = parseInt(val);
-                    } else {
-                        state[key] = val;
-                    }
-                    calculate();
-                });
-            });
-        }
+        <div style="font-weight:bold; margin-bottom:8px; font-size:14px;">■ 경력 환산 내역</div>
+        <table id="career-table">
+            <colgroup>
+                <col style="width:25%">
+                <col style="width:25%">
+                <col style="width:30%">
+                <col style="width:20%">
+            </colgroup>
+            <thead class="bg-light">
+                <tr>
+                    <th>시작일</th>
+                    <th>종료일</th>
+                    <th>기관 및 내용</th>
+                    <th>환산경력</th>
+                </tr>
+            </thead>
+            <tbody id="career-body">
+                <!-- JS에서 생성 -->
+            </tbody>
+            <tfoot class="bg-light" style="font-weight:bold;">
+                <tr>
+                    <td colspan="3">환산 경력 총계</td>
+                    <td id="total-career">0년 0월 0일</td>
+                </tr>
+            </tfoot>
+        </table>
 
-        function renderCareerRows() {
-            const tbody = document.getElementById('career-body');
-            tbody.innerHTML = '';
-            
-            state.careers.forEach((c, idx) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><input type="date" class="no-border-input career-input no-print" data-idx="${idx}" data-field="start" value="${c.start}"><span class="print-only hidden">${c.start}</span></td>
-                    <td><input type="date" class="no-border-input career-input no-print" data-idx="${idx}" data-field="end" value="${c.end}"><span class="print-only hidden">${c.end}</span></td>
-                    <td><input type="text" class="no-border-input career-input" data-idx="${idx}" data-field="org" value="${c.org}" placeholder="기관명"></td>
-                    <td><input type="number" class="no-border-input career-input" data-idx="${idx}" data-field="rate" value="${c.rate}">%</td>
-                    <td id="row-y-${idx}">0</td>
-                    <td id="row-m-${idx}">0</td>
-                    <td id="row-d-${idx}">0</td>
-                `;
-                tbody.appendChild(tr);
-            });
+        <div style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div style="border:1px solid #000; padding:10px; text-align:center;">
+                <div style="font-size:11px; color:#666;">잔여 월/일</div>
+                <div id="out-rem" style="font-size:18px; font-weight:bold;">0월 0일</div>
+            </div>
+            <div style="border:1px solid #0056b3; padding:10px; text-align:center;">
+                <div style="font-size:11px; color:#0056b3;">다음 승급 예정일</div>
+                <div id="out-next" style="font-size:18px; font-weight:bold; color:#0056b3;">-</div>
+            </div>
+        </div>
 
-            // 빈 행 추가 버튼
-            const addTr = document.createElement('tr');
-            addTr.className = "no-print";
-            addTr.innerHTML = `<td colspan="7" class="cursor-pointer bg-gray-50 hover:bg-gray-100 py-2 text-blue-600 font-bold" onclick="addCareerRow()">+ 경력 행 추가</td>`;
-            tbody.appendChild(addTr);
+        <div style="margin-top:80px; text-align:center;">
+            <p>위와 같이 호봉을 획정함</p>
+            <p id="today-date" style="margin-top:20px;"></p>
+            <p id="out-dept-footer" style="margin-top:40px; font-size:18px; font-weight:bold;"></p>
+        </div>
+    </div>
+</div>
 
-            document.querySelectorAll('.career-input').forEach(el => {
-                el.addEventListener('input', (e) => {
-                    const idx = e.target.dataset.idx;
-                    const field = e.target.dataset.field;
-                    state.careers[idx][field] = e.target.value;
-                    
-                    // 인쇄용 텍스트 업데이트 (날짜)
-                    if (field === 'start' || field === 'end') {
-                        e.target.nextElementSibling.innerText = e.target.value;
-                        e.target.nextElementSibling.classList.remove('hidden');
-                    }
-                    calculate();
-                });
-            });
-        }
+<script>
+    // 초기 경력 데이터
+    let careers = [{ s: '2020-03-01', e: '2021-02-28', n: 'OO초등학교 기간제교사', r: 100 }];
 
-        function addCareerRow() {
-            state.careers.push({ start: '', end: '', org: '', rate: 100 });
-            renderCareerRows();
-            calculate();
-        }
+    function init() {
+        document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('today-date').innerText = new Date().toLocaleDateString('ko-KR', {year:'numeric', month:'long', day:'numeric'});
+        renderCareers();
+        update();
+    }
 
-        function calcPeriod(startStr, endStr, ratePercent) {
-            if (!startStr || !endStr) return { y: 0, m: 0, d: 0 };
-            const start = new Date(startStr);
-            const end = new Date(endStr);
-            if (start > end) return { y: 0, m: 0, d: 0 };
+    function renderCareers() {
+        const body = document.getElementById('career-body');
+        body.innerHTML = '';
+        careers.forEach((c, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="date" class="career-input" value="${c.s}" onchange="edit(${i},'s',this.value)"></td>
+                <td><input type="date" class="career-input" value="${c.e}" onchange="edit(${i},'e',this.value)"></td>
+                <td><input type="text" class="career-input" value="${c.n}" oninput="edit(${i},'n',this.value)"></td>
+                <td id="res-${i}">0년 0월 0일</td>
+            `;
+            body.appendChild(tr);
+        });
+        
+        // 추가 버튼 (인쇄 제외)
+        const addRow = document.createElement('tr');
+        addRow.className = 'no-print';
+        addRow.innerHTML = `<td colspan="4" style="cursor:pointer; color:#0056b3; padding:10px;" onclick="add()">+ 경력 추가</td>`;
+        body.appendChild(addRow);
+    }
 
-            let diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-            const rate = ratePercent / 100;
-            let totalDays = Math.floor(diffDays * rate);
-            
-            let y = Math.floor(totalDays / 365);
-            let rem = totalDays % 365;
-            let m = Math.floor(rem / 30);
-            let d = rem % 30;
+    function add() { careers.push({ s:'', e:'', n:'', r:100 }); renderCareers(); update(); }
+    function edit(i, f, v) { careers[i][f] = v; update(); }
 
-            return { y, m, d };
-        }
+    function update() {
+        const dept = document.getElementById('in-dept').value;
+        const name = document.getElementById('in-name').value;
+        const cert = parseInt(document.getElementById('in-cert').value);
+        const edu = parseInt(document.getElementById('in-edu').value);
+        const plus = document.getElementById('in-plus').checked ? 1 : 0;
+        const baseDate = document.getElementById('in-date').value;
 
-        function calculate() {
-            document.getElementById('view-dept').innerText = state.dept;
-            document.getElementById('view-dept-display').innerText = state.dept || 'OOO교육청';
-            document.getElementById('view-dept-footer').innerText = state.dept || 'OOO교육청';
-            document.getElementById('view-name').innerText = state.name;
-            document.getElementById('view-base-date').innerText = state.baseDate;
-            document.getElementById('view-cert').innerText = document.getElementById('input-cert').options[document.getElementById('input-cert').selectedIndex].text;
-            document.getElementById('view-edu').innerText = document.getElementById('input-edu').options[document.getElementById('input-edu').selectedIndex].text;
-            document.getElementById('view-is-edu-college').innerText = state.isEduCollege ? '사범계 학교 졸업자 (가산대상)' : '비사범계 학교 졸업자';
-            
-            const startStep = state.certStep;
-            const adjust = state.eduAdjust;
-            const plus = state.isEduCollege ? 1 : 0;
-            
-            document.getElementById('view-start-step').innerText = startStep;
-            document.getElementById('view-edu-adjust').innerText = adjust >= 0 ? `+${adjust}` : adjust;
-            document.getElementById('view-edu-plus').innerText = `+${plus}`;
+        document.getElementById('out-dept-sub').innerText = dept || '기관명 미입력';
+        document.getElementById('out-dept-footer').innerText = dept || '기관명 미입력';
+        document.getElementById('out-name').innerText = name || '성명';
+        document.getElementById('out-date').innerText = baseDate;
+        document.getElementById('out-cert').innerText = cert + " 호봉";
+        document.getElementById('out-edu').innerText = (edu >= 0 ? "+" : "") + edu;
+        document.getElementById('out-plus').innerText = "+" + plus;
 
-            let totalY = 0, totalM = 0, totalD = 0;
-            state.careers.forEach((c, idx) => {
-                const res = calcPeriod(c.start, c.end, c.rate);
-                document.getElementById(`row-y-${idx}`).innerText = res.y;
-                document.getElementById(`row-m-${idx}`).innerText = res.m;
-                document.getElementById(`row-d-${idx}`).innerText = res.d;
-                totalY += res.y;
-                totalM += res.m;
-                totalD += res.d;
-            });
+        let tY = 0, tM = 0, tD = 0;
 
-            totalM += Math.floor(totalD / 30);
-            totalD = totalD % 30;
-            totalY += Math.floor(totalM / 12);
-            totalM = totalM % 12;
-
-            document.getElementById('total-y').innerText = totalY;
-            document.getElementById('total-m').innerText = totalM;
-            document.getElementById('total-d').innerText = totalD;
-
-            document.getElementById('view-career-y').innerText = `${totalY}년`;
-            document.getElementById('view-career-md').innerText = `${totalM}월 ${totalD}일`;
-            document.getElementById('view-rem-period').innerText = `${totalM}월 ${totalD}일`;
-
-            const finalStep = startStep + adjust + plus + totalY;
-            document.getElementById('view-final-step').innerText = `${finalStep} 호봉`;
-
-            if (state.baseDate) {
-                const base = new Date(state.baseDate);
-                let monthsToNext = 12 - totalM;
-                const nextDate = new Date(base.getFullYear(), base.getMonth() + monthsToNext, 1);
-                document.getElementById('view-next-date').innerText = nextDate.toISOString().split('T')[0];
-            }
-
-            // 인쇄용 날짜 텍스트 동기화
-            document.querySelectorAll('.career-input[data-field="start"], .career-input[data-field="end"]').forEach(el => {
-                if (el.value) {
-                    el.nextElementSibling.innerText = el.value;
-                    el.nextElementSibling.classList.remove('hidden');
+        careers.forEach((c, i) => {
+            if(c.s && c.e) {
+                const start = new Date(c.s);
+                const end = new Date(c.e);
+                let diff = Math.floor((end - start) / (1000*60*60*24)) + 1;
+                
+                if(diff > 0) {
+                    let y = Math.floor(diff / 365);
+                    let m = Math.floor((diff % 365) / 30);
+                    let d = (diff % 365) % 30;
+                    document.getElementById(`res-${i}`).innerText = `${y}년 ${m}월 ${d}일`;
+                    tY += y; tM += m; tD += d;
                 }
-            });
-        }
+            }
+        });
 
-        window.onload = init;
-    </script>
+        tM += Math.floor(tD / 30); tD %= 30;
+        tY += Math.floor(tM / 12); tM %= 12;
+
+        document.getElementById('total-career').innerText = `${tY}년 ${tM}월 ${tD}일`;
+        document.getElementById('out-career').innerText = `${tY}년`;
+        document.getElementById('out-final').innerText = (cert + edu + plus + tY) + " 호봉";
+        document.getElementById('out-rem').innerText = `${tM}월 ${tD}일`;
+
+        if(baseDate) {
+            const next = new Date(baseDate);
+            next.setMonth(next.getMonth() + (12 - tM));
+            next.setDate(1);
+            document.getElementById('out-next').innerText = next.toISOString().split('T')[0];
+        }
+    }
+
+    window.onload = init;
+</script>
+
 </body>
 </html>
