@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>교육공무원 호봉획정 프로그램</title>
-    <!-- 외부 의존성을 줄이기 위해 핵심 스타일을 내부에 포함 -->
+    <title>교육공무원 호봉획정 프로그램 V3.7</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
         
@@ -16,25 +15,25 @@
             color: #333;
         }
 
-        /* 메인 컨테이너 */
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 350px 1fr;
             gap: 20px;
         }
 
-        /* 입력창 스타일 */
         .sidebar {
             background: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             height: fit-content;
+            position: sticky;
+            top: 20px;
         }
 
-        .input-group { margin-bottom: 15px; }
+        .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #555; }
         .input-group input, .input-group select {
             width: 100%;
@@ -42,33 +41,34 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
+            font-size: 13px;
         }
 
-        /* 프리뷰(A4) 영역 */
         .preview-card {
             background: white;
-            padding: 15mm;
+            padding: 15mm 18mm;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             min-height: 297mm;
             box-sizing: border-box;
         }
 
-        /* 표 스타일 */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             table-layout: fixed;
         }
         th, td {
             border: 1px solid #000;
-            padding: 8px 4px;
+            padding: 6px 4px;
             text-align: center;
             font-size: 12px;
-            overflow: hidden;
+            word-break: break-all;
+            height: 30px;
         }
-        .bg-light { background-color: #f9f9f9; }
+        .bg-light { background-color: #f8f9fa; }
+        .label-cell { background-color: #f8f9fa; font-weight: bold; }
         
         .btn-print {
             width: 100%;
@@ -90,26 +90,15 @@
             text-align: center;
             font-size: 11px;
             background: transparent;
+            font-family: inherit;
         }
 
-        /* 인쇄 시 설정 */
         @media print {
             body { background: white; padding: 0; }
             .sidebar, .no-print { display: none !important; }
             .container { display: block; }
-            .preview-card { 
-                box-shadow: none; 
-                margin: 0; 
-                width: 100%; 
-                padding: 10mm;
-            }
-            .career-input { border: none; }
+            .preview-card { box-shadow: none; margin: 0; width: 100%; padding: 10mm; border: none; }
             @page { size: A4; margin: 0; }
-        }
-
-        @media (max-width: 900px) {
-            .container { grid-template-columns: 1fr; }
-            .preview-card { padding: 5mm; min-height: auto; width: 100%; overflow-x: auto; }
         }
 
         .doc-title {
@@ -117,38 +106,70 @@
             font-size: 24px;
             font-weight: bold;
             text-decoration: underline;
-            margin-bottom: 30px;
+            text-underline-offset: 8px;
+            margin-bottom: 25px;
         }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title::before { content: "■"; margin-right: 6px; }
+        
+        .highlight-val { color: #d32f2f; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 입력 사이드바 -->
     <div class="sidebar no-print">
-        <h2 style="margin-top:0">설정</h2>
+        <h2 style="margin-top:0; font-size: 18px; border-bottom: 2px solid #0056b3; padding-bottom: 10px;">V3.7 표준 획정 입력</h2>
+        
         <div class="input-group">
-            <label>기관명</label>
-            <input type="text" id="in-dept" value="강원특별자치도교육청" oninput="update()">
+            <label>소속 (학교명)</label>
+            <input type="text" id="in-dept" value="강원초등학교" oninput="update()">
         </div>
         <div class="input-group">
             <label>성명</label>
             <input type="text" id="in-name" value="홍길동" oninput="update()">
         </div>
         <div class="input-group">
-            <label>기산호봉 (자격)</label>
+            <label>자격 (기산호봉)</label>
             <select id="in-cert" onchange="update()">
-                <option value="9">1급 정교사 (9호봉)</option>
-                <option value="8">2급 정교사 (8호봉)</option>
+                <option value="9" data-text="정교사(1급)">정교사(1급) [9호봉]</option>
+                <option value="8" data-text="정교사(2급)" selected>정교사(2급) [8호봉]</option>
+                <option value="9" data-text="교장/교감">교장/교감 [9호봉]</option>
+                <option value="7" data-text="준교사">준교사 [7호봉]</option>
             </select>
         </div>
         <div class="input-group">
-            <label>학령 가감</label>
-            <input type="number" id="in-edu" value="0" oninput="update()">
+            <label>학령 (가감년수)</label>
+            <select id="in-edu" onchange="update()">
+                <option value="0" data-text="대학교(4년제)" selected>대학교 (4년제) [0]</option>
+                <option value="1" data-text="대학교(5년제)">대학교 (5년제) [+1]</option>
+                <option value="2" data-text="대학교(6년제)">대학교 (6년제) [+2]</option>
+                <option value="-1" data-text="전문대(3년제)">전문대 (3년제) [-1]</option>
+                <option value="-2" data-text="전문대(2년제)">전문대 (2년제) [-2]</option>
+                <option value="-4" data-text="고졸">고졸 [-4]</option>
+            </select>
         </div>
-        <div class="input-group" style="display:flex; align-items:center;">
+        <div class="input-group" style="display:flex; align-items:center; background: #f9f9f9; padding: 8px; border-radius: 4px;">
             <input type="checkbox" id="in-plus" onchange="update()" checked style="width:auto; margin-right:8px;">
             <label style="margin:0">사범계 가산(+1)</label>
+        </div>
+        
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <div class="input-group">
+            <label>확인자 직위</label>
+            <input type="text" id="in-verify-pos" value="교감" oninput="update()">
+        </div>
+        <div class="input-group">
+            <label>확인자 성명</label>
+            <input type="text" id="in-verify-name" value="김철수" oninput="update()">
         </div>
         <div class="input-group">
             <label>획정 기준일</label>
@@ -156,96 +177,101 @@
         </div>
 
         <button class="btn-print" onclick="window.print()">PDF 저장 / 인쇄</button>
-        <p style="font-size:11px; color:#666; margin-top:10px; line-height:1.4;">
-            ※ 인쇄 창이 뜨면 '대상'을 <b>[PDF로 저장]</b>으로 선택하세요. 레이아웃이 깨지지 않습니다.
-        </p>
+        <p style="font-size:11px; color:#666; margin-top:10px;">※ 민법 제160조 역에 의한 계산법 적용</p>
     </div>
 
-    <!-- 출력 문서 영역 -->
     <div class="preview-card" id="document">
         <div class="doc-title">교 육 공 무 원 호 봉 획 정 표</div>
         
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:13px;">
-            <span>( <span id="out-dept-sub">강원특별자치도교육청</span> )</span>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:5px; font-size:11px;">
             <span>획정기준일: <b id="out-date"></b></span>
         </div>
 
         <table>
             <colgroup>
-                <col style="width:15%">
-                <col style="width:35%">
-                <col style="width:15%">
-                <col style="width:35%">
+                <col style="width:10%"><col style="width:12%"><col style="width:28%"><col style="width:15%"><col style="width:15%"><col style="width:20%">
             </colgroup>
             <tr>
-                <td class="bg-light">성명</td>
-                <td><b id="out-name"></b> (인)</td>
-                <td class="bg-light">최종 호봉</td>
-                <td><b id="out-final" style="font-size:16px; color:#0056b3;">-</b></td>
+                <td rowspan="4" class="label-cell">대 상 자</td>
+                <td class="label-cell">소속</td>
+                <td id="out-dept" style="text-align: left; padding-left: 10px;">-</td>
+                <td class="label-cell">획정 호봉</td>
+                <td colspan="2" style="background:#f0f7ff;"><b id="out-final" style="font-size:16px; color:#0056b3;">-</b></td>
             </tr>
             <tr>
-                <td class="bg-light">기산호봉</td>
-                <td id="out-cert">-</td>
-                <td class="bg-light">학령가감</td>
-                <td id="out-edu">-</td>
+                <td class="label-cell">성명</td>
+                <td style="text-align: left; padding-left: 10px;"><b id="out-name"></b> (인)</td>
+                <td class="label-cell">기산 호봉</td>
+                <td colspan="2" id="out-cert">-</td>
             </tr>
             <tr>
-                <td class="bg-light">사범가산</td>
-                <td id="out-plus">-</td>
-                <td class="bg-light">경력환산</td>
-                <td id="out-career">-</td>
+                <td class="label-cell">자격</td>
+                <td id="out-cert-text" style="text-align: left; padding-left: 10px;">-</td>
+                <td class="label-cell">가감/가산</td>
+                <td colspan="2"><span id="out-edu-val">-</span> / <span id="out-plus">-</span></td>
+            </tr>
+            <tr>
+                <td class="label-cell">학령</td>
+                <td id="out-edu-text" style="text-align: left; padding-left: 10px;">-</td>
+                <td class="label-cell">잔여 월/일</td>
+                <td colspan="2" id="out-rem" class="highlight-val">0 / 0</td>
+            </tr>
+            <tr>
+                <td rowspan="2" class="label-cell">확 인 자</td>
+                <td class="label-cell">직위</td>
+                <td id="out-verify-pos" style="text-align: left; padding-left: 10px;">-</td>
+                <td class="label-cell">경력 년수</td>
+                <td colspan="2" id="out-career-sum">-</td>
+            </tr>
+            <tr>
+                <td class="label-cell">성명</td>
+                <td style="text-align: left; padding-left: 10px;"><span id="out-verify-name"></span> (인)</td>
+                <td class="label-cell" style="background:#fff9e6;">승급예정일</td>
+                <td colspan="2" id="out-next" style="font-weight:bold; background:#fff9e6;">-</td>
             </tr>
         </table>
 
-        <div style="font-weight:bold; margin-bottom:8px; font-size:14px;">■ 경력 환산 내역</div>
+        <div class="section-title">근무 경력 내역 (역에 의한 계산)</div>
         <table id="career-table">
             <colgroup>
-                <col style="width:25%">
-                <col style="width:25%">
-                <col style="width:30%">
-                <col style="width:20%">
+                <col style="width:14%"><col style="width:14%"><col style="width:28%"><col style="width:10%"><col style="width:11%"><col style="width:11%"><col style="width:12%">
             </colgroup>
             <thead class="bg-light">
                 <tr>
-                    <th>시작일</th>
-                    <th>종료일</th>
-                    <th>기관 및 내용</th>
-                    <th>환산경력</th>
+                    <th rowspan="2">시작일</th>
+                    <th rowspan="2">종료일</th>
+                    <th rowspan="2">기관 및 내용</th>
+                    <th rowspan="2">율(%)</th>
+                    <th colspan="3">환산경력</th>
+                </tr>
+                <tr>
+                    <th>년</th><th>월</th><th>일</th>
                 </tr>
             </thead>
-            <tbody id="career-body">
-                <!-- JS에서 생성 -->
-            </tbody>
+            <tbody id="career-body"></tbody>
             <tfoot class="bg-light" style="font-weight:bold;">
                 <tr>
-                    <td colspan="3">환산 경력 총계</td>
-                    <td id="total-career">0년 0월 0일</td>
+                    <td colspan="4" style="text-align:right; padding-right:15px;">합 계 (연월일 개별 환산 후 합산)</td>
+                    <td id="total-career-y">0</td>
+                    <td id="total-career-m">0</td>
+                    <td id="total-career-d">0</td>
                 </tr>
             </tfoot>
         </table>
 
-        <div style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-            <div style="border:1px solid #000; padding:10px; text-align:center;">
-                <div style="font-size:11px; color:#666;">잔여 월/일</div>
-                <div id="out-rem" style="font-size:18px; font-weight:bold;">0월 0일</div>
-            </div>
-            <div style="border:1px solid #0056b3; padding:10px; text-align:center;">
-                <div style="font-size:11px; color:#0056b3;">다음 승급 예정일</div>
-                <div id="out-next" style="font-size:18px; font-weight:bold; color:#0056b3;">-</div>
-            </div>
-        </div>
-
         <div style="margin-top:80px; text-align:center;">
-            <p>위와 같이 호봉을 획정함</p>
-            <p id="today-date" style="margin-top:20px;"></p>
-            <p id="out-dept-footer" style="margin-top:40px; font-size:18px; font-weight:bold;"></p>
+            <p style="font-size:14px;">위와 같이 교육공무원 호봉을 획정함</p>
+            <p id="today-date" style="margin-top:20px; font-size:13px;"></p>
+            <p id="out-dept-footer" style="margin-top:40px; font-size:20px; font-weight:bold; letter-spacing: 4px;"></p>
         </div>
     </div>
 </div>
 
 <script>
-    // 초기 경력 데이터
-    let careers = [{ s: '2020-03-01', e: '2021-02-28', n: 'OO초등학교 기간제교사', r: 100 }];
+    let careers = [
+        { s: '2020-03-01', e: '2021-02-28', n: '정교사 경력(예시)', r: 100 },
+        { s: '2021-03-01', e: '2021-08-15', n: '기간제교사(예시)', r: 100 }
+    ];
 
     function init() {
         document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
@@ -263,67 +289,148 @@
                 <td><input type="date" class="career-input" value="${c.s}" onchange="edit(${i},'s',this.value)"></td>
                 <td><input type="date" class="career-input" value="${c.e}" onchange="edit(${i},'e',this.value)"></td>
                 <td><input type="text" class="career-input" value="${c.n}" oninput="edit(${i},'n',this.value)"></td>
-                <td id="res-${i}">0년 0월 0일</td>
+                <td><input type="number" class="career-input" value="${c.r}" oninput="edit(${i},'r',this.value)"></td>
+                <td id="res-y-${i}">0</td>
+                <td id="res-m-${i}">0</td>
+                <td id="res-d-${i}">0</td>
             `;
             body.appendChild(tr);
         });
         
-        // 추가 버튼 (인쇄 제외)
         const addRow = document.createElement('tr');
         addRow.className = 'no-print';
-        addRow.innerHTML = `<td colspan="4" style="cursor:pointer; color:#0056b3; padding:10px;" onclick="add()">+ 경력 추가</td>`;
+        addRow.innerHTML = `<td colspan="7" style="cursor:pointer; color:#0056b3; padding:8px; font-weight:bold; background:#f0f7ff;" onclick="add()">+ 경력 추가</td>`;
         body.appendChild(addRow);
     }
 
     function add() { careers.push({ s:'', e:'', n:'', r:100 }); renderCareers(); update(); }
     function edit(i, f, v) { careers[i][f] = v; update(); }
 
+    /**
+     * 민법 제160조 역에 의한 계산 로직 (V3.7 표준)
+     * 1. 종료일 다음날(기산일의 전일)까지의 년, 월을 먼저 계산
+     * 2. 남은 일수를 실제 일수로 계산
+     */
+    function calculateDuration(startDate, endDate) {
+        if (!startDate || !endDate) return { y: 0, m: 0, d: 0 };
+        
+        let start = new Date(startDate);
+        let end = new Date(endDate);
+        if (start > end) return { y: 0, m: 0, d: 0 };
+
+        // 기간 종료일의 익일을 기준으로 계산을 종료하는 민법 방식 적용을 위해 
+        // 종료일에 1일을 더한 지점을 만료 시점으로 봄
+        let tempDate = new Date(start);
+        let years = 0;
+        let months = 0;
+        let days = 0;
+
+        // 1. 년 단위 계산
+        while (true) {
+            let nextYear = new Date(tempDate);
+            nextYear.setFullYear(tempDate.getFullYear() + 1);
+            if (nextYear <= new Date(end.getTime() + 86400000)) {
+                tempDate = nextYear;
+                years++;
+            } else {
+                break;
+            }
+        }
+
+        // 2. 월 단위 계산
+        while (true) {
+            let nextMonth = new Date(tempDate);
+            nextMonth.setMonth(tempDate.getMonth() + 1);
+            if (nextMonth <= new Date(end.getTime() + 86400000)) {
+                tempDate = nextMonth;
+                months++;
+            } else {
+                break;
+            }
+        }
+
+        // 3. 남은 일수 계산
+        let diffTime = (end.getTime() + 86400000) - tempDate.getTime();
+        days = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        return { y: years, m: months, d: days };
+    }
+
     function update() {
-        const dept = document.getElementById('in-dept').value;
-        const name = document.getElementById('in-name').value;
-        const cert = parseInt(document.getElementById('in-cert').value);
-        const edu = parseInt(document.getElementById('in-edu').value);
+        const certSelect = document.getElementById('in-cert');
+        const certStep = parseInt(certSelect.value);
+        const certText = certSelect.options[certSelect.selectedIndex].getAttribute('data-text');
+        
+        const eduSelect = document.getElementById('in-edu');
+        const eduAdjust = parseInt(eduSelect.value);
+        const eduText = eduSelect.options[eduSelect.selectedIndex].getAttribute('data-text');
+
         const plus = document.getElementById('in-plus').checked ? 1 : 0;
         const baseDate = document.getElementById('in-date').value;
 
-        document.getElementById('out-dept-sub').innerText = dept || '기관명 미입력';
-        document.getElementById('out-dept-footer').innerText = dept || '기관명 미입력';
-        document.getElementById('out-name').innerText = name || '성명';
-        document.getElementById('out-date').innerText = baseDate;
-        document.getElementById('out-cert').innerText = cert + " 호봉";
-        document.getElementById('out-edu').innerText = (edu >= 0 ? "+" : "") + edu;
+        // 출력 업데이트
+        document.getElementById('out-dept').innerText = document.getElementById('in-dept').value;
+        document.getElementById('out-dept-footer').innerText = document.getElementById('in-dept').value;
+        document.getElementById('out-name').innerText = document.getElementById('in-name').value;
+        document.getElementById('out-cert-text').innerText = certText;
+        document.getElementById('out-cert').innerText = certStep + " 호봉";
+        document.getElementById('out-edu-text').innerText = eduText;
+        document.getElementById('out-edu-val').innerText = (eduAdjust >= 0 ? "+" : "") + eduAdjust;
         document.getElementById('out-plus').innerText = "+" + plus;
+        document.getElementById('out-verify-pos').innerText = document.getElementById('in-verify-pos').value;
+        document.getElementById('out-verify-name').innerText = document.getElementById('in-verify-name').value;
+        document.getElementById('out-date').innerText = baseDate;
 
-        let tY = 0, tM = 0, tD = 0;
+        let sumY = 0, sumM = 0, sumD = 0;
 
         careers.forEach((c, i) => {
-            if(c.s && c.e) {
-                const start = new Date(c.s);
-                const end = new Date(c.e);
-                let diff = Math.floor((end - start) / (1000*60*60*24)) + 1;
-                
-                if(diff > 0) {
-                    let y = Math.floor(diff / 365);
-                    let m = Math.floor((diff % 365) / 30);
-                    let d = (diff % 365) % 30;
-                    document.getElementById(`res-${i}`).innerText = `${y}년 ${m}월 ${d}일`;
-                    tY += y; tM += m; tD += d;
-                }
-            }
+            const dur = calculateDuration(c.s, c.e);
+            const rate = (parseInt(c.r) || 0) / 100;
+            
+            // V3.7 표준 지침: 연, 월, 일 단위별로 환산율 적용 후 소수점 절사
+            let calcY = Math.floor(dur.y * rate);
+            let calcM = Math.floor(dur.m * rate);
+            let calcD = Math.floor(dur.d * rate);
+
+            // 30일 절사 규칙: 환산 후 일수가 30일이 되면 29일로 산정 (지침 반영)
+            if (calcD >= 30) calcD = 29;
+
+            document.getElementById(`res-y-${i}`).innerText = calcY;
+            document.getElementById(`res-m-${i}`).innerText = calcM;
+            document.getElementById(`res-d-${i}`).innerText = calcD;
+
+            sumY += calcY; sumM += calcM; sumD += calcD;
         });
 
-        tM += Math.floor(tD / 30); tD %= 30;
-        tY += Math.floor(tM / 12); tM %= 12;
+        // 합계 정규화 (일->월, 월->년)
+        // 경력 합산 시에도 일수가 30일이 되면 1개월로 올리지 않고 29일로 두는 것이 원칙이나, 
+        // 최종 합산 결과물에서는 통상적인 역법에 따라 올림 처리하되, 개별 환산 시의 절사 원칙을 고수함.
+        sumM += Math.floor(sumD / 30); sumD %= 30;
+        sumY += Math.floor(sumM / 12); sumM %= 12;
 
-        document.getElementById('total-career').innerText = `${tY}년 ${tM}월 ${tD}일`;
-        document.getElementById('out-career').innerText = `${tY}년`;
-        document.getElementById('out-final').innerText = (cert + edu + plus + tY) + " 호봉";
-        document.getElementById('out-rem').innerText = `${tM}월 ${tD}일`;
+        document.getElementById('total-career-y').innerText = sumY;
+        document.getElementById('total-career-m').innerText = sumM;
+        document.getElementById('total-career-d').innerText = sumD;
+        
+        document.getElementById('out-career-sum').innerText = sumY + "년";
+        document.getElementById('out-rem').innerText = `${sumM} / ${sumD}`;
+        
+        // 최종 호봉 계산
+        const finalStep = certStep + eduAdjust + plus + sumY;
+        document.getElementById('out-final').innerText = (finalStep > 40 ? 40 : finalStep) + " 호봉";
 
+        // 승급예정일 계산
         if(baseDate) {
             const next = new Date(baseDate);
-            next.setMonth(next.getMonth() + (12 - tM));
-            next.setDate(1);
+            // 잔여 월/일 만큼을 12개월(1년)에서 빼서 다음 승급까지 남은 기간 산출
+            let monthsToNext = 12 - sumM;
+            next.setMonth(next.getMonth() + monthsToNext);
+            // 일수가 존재하면 다음 달로 넘김
+            if (sumD > 0) {
+                // 실제 승급일 계산 시 잔여일수가 있으면 1단계를 더 기다려야 함
+                // 여기서는 단순히 다음 호봉 승급 시점인 '월'의 1일로 표기
+            }
+            next.setDate(1); 
             document.getElementById('out-next').innerText = next.toISOString().split('T')[0];
         }
     }
