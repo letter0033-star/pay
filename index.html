@@ -106,7 +106,7 @@
         /* Action Buttons */
         .action-btn-container {
             display: grid;
-            grid-template-cols: 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 20px;
         }
@@ -154,20 +154,22 @@
         .btn-fancy-print:hover { background: #0f172a; }
 
         @media print {
-            body { background: white; padding: 0; }
+            body { background: white; padding: 0; margin: 0; }
             .no-print { display: none !important; }
-            /* PDF 출력 시 여백 문제 수정을 위해 padding을 0으로 하고 @page 마진을 사용 */
             .paper { 
                 box-shadow: none; 
                 margin: 0 !important; 
                 width: 100% !important; 
+                /* 개별 페이지 여백은 @page에서 제어하므로 패딩은 최소화 */
                 padding: 0 !important; 
                 min-height: auto;
+                box-sizing: border-box;
             }
-            /* @page margin을 설정하여 2페이지 상단 여백 확보 */
             @page { 
                 size: A4; 
-                margin: 20mm 15mm; 
+                /* 페이지 상하좌우 여백을 설정하여 2페이지 상단에도 여백이 생기도록 함 */
+                /* 브라우저 헤더/푸터를 숨기려면 출력 설정에서 '머리말과 꼬리말' 체크를 해제해야 합니다. */
+                margin: 15mm 15mm; 
             }
         }
     </style>
