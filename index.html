@@ -156,8 +156,19 @@
         @media print {
             body { background: white; padding: 0; }
             .no-print { display: none !important; }
-            .paper { box-shadow: none; margin: 0; width: 100%; padding: 10mm; border: none; }
-            @page { size: A4; margin: 0; }
+            /* PDF 출력 시 여백 문제 수정을 위해 padding을 0으로 하고 @page 마진을 사용 */
+            .paper { 
+                box-shadow: none; 
+                margin: 0 !important; 
+                width: 100% !important; 
+                padding: 0 !important; 
+                min-height: auto;
+            }
+            /* @page margin을 설정하여 2페이지 상단 여백 확보 */
+            @page { 
+                size: A4; 
+                margin: 20mm 15mm; 
+            }
         }
     </style>
 </head>
@@ -447,10 +458,6 @@
         return d.getDate() === lastDay;
     }
 
-    /**
-     * [계산 로직] v3.9.3 환산기의 '역(曆)에 의한 계산' 방식 적용
-     * 31일이 있는 달에서 1.1~1.30 근무 시 29일로 처리하는 예외 조항 포함
-     */
     function calcV38(sStr, eStr) {
         if(!sStr || !eStr) return {y:0, m:0, d:0};
         
@@ -485,7 +492,6 @@
             
             const currentMonthTotalDays = new Date(eY, eM + 1, 0).getDate();
             
-            // v3.9.3 특유의 31일 달 30일 경과 시 29일 보정 로직
             if (currentMonthTotalDays === 31 && !(sLast && eLast)) {
                 if (days === 30) days = 29;
             }
