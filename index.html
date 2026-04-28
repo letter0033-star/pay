@@ -106,7 +106,7 @@
         /* Action Buttons */
         .action-btn-container {
             display: grid;
-            grid-template-cols: 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 20px;
         }
@@ -154,20 +154,21 @@
         .btn-fancy-print:hover { background: #0f172a; }
 
         @media print {
-            body { background: white; padding: 0; }
+            body { background: white; padding: 0; margin: 0; }
             .no-print { display: none !important; }
-            /* PDF 출력 시 여백 문제 수정을 위해 padding을 0으로 하고 @page 마진을 사용 */
+            /* 브라우저 자체 머리말/꼬리말(URL, 날짜 등)을 제거하기 위해 @page 마진을 0으로 설정 */
             .paper { 
                 box-shadow: none; 
                 margin: 0 !important; 
                 width: 100% !important; 
-                padding: 0 !important; 
-                min-height: auto;
+                /* @page 마진이 0이므로 실제 출력될 여백은 여기서 패딩으로 제어 */
+                padding: 20mm 15mm !important; 
+                min-height: 297mm;
+                box-sizing: border-box;
             }
-            /* @page margin을 설정하여 2페이지 상단 여백 확보 */
             @page { 
                 size: A4; 
-                margin: 20mm 15mm; 
+                margin: 0; /* 이 설정이 날짜, 주소 등 불필요한 머리말/꼬리말을 보이지 않게 합니다 */
             }
         }
     </style>
