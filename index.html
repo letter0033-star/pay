@@ -162,6 +162,8 @@
                 height: auto !important;
                 min-height: 0 !important;
                 background: white !important;
+                /* 인쇄 시 스크롤바 제거 */
+                overflow: visible !important;
             }
             body { 
                 padding: 0 !important; 
@@ -169,12 +171,14 @@
                 display: block !important;
             }
             .no-print { display: none !important; }
+            /* 페이지 수 조절 및 스크롤바 제거를 위해 레이아웃 컨테이너 높이와 오버플로우 설정 해제 */
             .flex, .flex-1, main {
                 display: block !important;
                 height: auto !important;
                 min-height: 0 !important;
                 padding: 0 !important;
                 margin: 0 !important;
+                overflow: visible !important;
             }
             .paper { 
                 box-shadow: none !important; 
@@ -184,7 +188,9 @@
                 min-height: 0 !important; 
                 height: auto !important;
                 display: block !important;
+                overflow: visible !important;
             }
+            /* 테이블 분할 방지 및 정렬 설정 */
             table { page-break-inside: auto; border-collapse: collapse; }
             tr { page-break-inside: avoid; page-break-after: auto; }
             thead { display: table-header-group; }
