@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>호봉획정프로그램 V3.9 (2026.04.28)</title>
+    <title>호봉획정프로그램 V3.9 (2026.04.29)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
@@ -106,7 +106,7 @@
         /* Action Buttons */
         .action-btn-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-cols: 1fr 1fr;
             gap: 10px;
             margin-top: 20px;
         }
@@ -154,23 +154,42 @@
         .btn-fancy-print:hover { background: #0f172a; }
 
         @media print {
-            body { background: white; padding: 0; margin: 0; }
-            .no-print { display: none !important; }
-            .paper { 
-                box-shadow: none; 
-                margin: 0 !important; 
-                width: 100% !important; 
-                /* 개별 페이지 여백은 @page에서 제어하므로 패딩은 최소화 */
-                padding: 0 !important; 
-                min-height: auto;
-                box-sizing: border-box;
-            }
             @page { 
                 size: A4; 
-                /* 페이지 상하좌우 여백을 설정하여 2페이지 상단에도 여백이 생기도록 함 */
-                /* 브라우저 헤더/푸터를 숨기려면 출력 설정에서 '머리말과 꼬리말' 체크를 해제해야 합니다. */
                 margin: 15mm 15mm; 
             }
+            html, body {
+                height: auto !important;
+                min-height: 0 !important;
+                background: white !important;
+            }
+            body { 
+                padding: 0 !important; 
+                margin: 0 !important;
+                display: block !important;
+            }
+            .no-print { display: none !important; }
+            .flex, .flex-1, main {
+                display: block !important;
+                height: auto !important;
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .paper { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                width: 100% !important; 
+                padding: 0 !important; 
+                min-height: 0 !important; 
+                height: auto !important;
+                display: block !important;
+            }
+            table { page-break-inside: auto; border-collapse: collapse; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+            /* 2쪽으로 넘어갈 경우 1쪽 하단에 합계가 반복 표시되지 않도록 설정을 일반 행 그룹으로 변경 */
+            tfoot { display: table-row-group; }
         }
     </style>
 </head>
@@ -234,13 +253,20 @@
                     <option value="8" data-text="정교사(2급)" selected>정교사(2급) [8호봉]</option>
                 </select>
                 <select id="in-edu" onchange="update()" class="select-compact">
-                    <option value="0" data-text="대학교(4년제 졸업)" selected>대학교 (4년제) [0]</option>
-                    <option value="1" data-text="대학교(5년제 졸업)">대학교 (5년제) [+1]</option>
                     <option value="2" data-text="대학교(6년제 졸업)">대학교 (6년제) [+2]</option>
+                    <option value="1" data-text="대학교(5년제 졸업)">대학교 (5년제) [+1]</option>
+                    <option value="0" data-text="대학교(4년제 졸업)" selected>대학교 (4년제) [0]</option>
+                    <option value="-1" data-text="전문대(3년제 졸업)">전문대 (3년제) [-1]</option>
+                    <option value="-2" data-text="전문대(2년제 졸업)">전문대 (2년제) [-2]</option>
                 </select>
-                <div class="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <input type="checkbox" id="in-plus" onchange="update()" checked class="w-4 h-4">
-                    <label class="text-sm font-medium text-blue-900">사범계 가산(+1)</label>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-500 mb-1 block">가산 호봉 (사범/특수)</label>
+                    <select id="in-plus" onchange="update()" class="select-compact">
+                        <option value="0">해당 없음 [0]</option>
+                        <option value="1" selected>사범계 가산 [+1]</option>
+                        <option value="1">특수 가산 [+1]</option>
+                        <option value="2">특수 + 사범계 [+2]</option>
+                    </select>
                 </div>
             </section>
 
@@ -313,7 +339,7 @@
                 <tr>
                     <td class="label">학 령</td>
                     <td id="out-edu-text" class="text-left px-3"></td>
-                    <td class="label">사범가산</td>
+                    <td class="label">기타가산</td>
                     <td colspan="2" id="out-plus-val" class="font-bold"></td>
                 </tr>
                 <tr>
@@ -371,9 +397,14 @@
                 <tbody id="career-body"></tbody>
                 <tfoot class="bg-slate-50 font-bold">
                     <tr>
-                        <td colspan="7" class="text-right px-4">환산 경력 합계</td>
+                        <td colspan="3" class="text-right px-4">근무경력/환산경력 합계</td>
+                        <td id="total-raw-y" class="text-slate-500 font-normal">0</td>
+                        <td id="total-raw-m" class="text-slate-500 font-normal">0</td>
+                        <td id="total-raw-d" class="text-slate-500 font-normal">0</td>
+                        <td></td>
                         <td id="total-y">0</td><td id="total-m">0</td><td id="total-d">0</td>
-                        <td></td><td class="no-print"></td>
+                        <td colspan="1"></td>
+                        <td class="no-print"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -549,15 +580,19 @@
         document.getElementById('out-edu-text').innerText = eduS.options[eduS.selectedIndex].getAttribute('data-text');
         document.getElementById('out-edu-val').innerText = (eAdj >= 0 ? "+" : "") + eAdj;
         
-        const plus = document.getElementById('in-plus').checked ? 1 : 0;
+        const plus = parseInt(document.getElementById('in-plus').value) || 0;
         document.getElementById('out-plus-val').innerText = "+" + plus;
 
         let totalY = 0, totalM = 0, totalD = 0;
+        let totalRawY = 0, totalRawM = 0, totalRawD = 0;
+
         careers.forEach((c, i) => {
             const raw = calcV38(c.s, c.e);
             document.getElementById(`raw-y-${i}`).innerText = raw.y;
             document.getElementById(`raw-m-${i}`).innerText = raw.m;
             document.getElementById(`raw-d-${i}`).innerText = raw.d;
+
+            totalRawY += raw.y; totalRawM += raw.m; totalRawD += raw.d;
 
             const rate = (parseFloat(c.r) || 0) / 100;
             let rawTotalDays = (raw.y * 360) + (raw.m * 30) + raw.d;
@@ -574,6 +609,15 @@
             totalY += y; totalM += m; totalD += d;
         });
 
+        // 근무경력 합계 계산
+        totalRawM += Math.floor(totalRawD / 30); totalRawD = totalRawD % 30;
+        totalRawY += Math.floor(totalRawM / 12); totalRawM = totalRawM % 12;
+
+        document.getElementById('total-raw-y').innerText = totalRawY;
+        document.getElementById('total-raw-m').innerText = totalRawM;
+        document.getElementById('total-raw-d').innerText = totalRawD;
+
+        // 환산경력 합계 계산
         totalM += Math.floor(totalD / 30); totalD = totalD % 30;
         totalY += Math.floor(totalM / 12); totalM = totalM % 12;
 
@@ -606,13 +650,14 @@
                 date: document.getElementById('in-date').value,
                 note: document.getElementById('in-note').value,
                 vRank: document.getElementById('in-verifier-rank').value,
-                vName: document.getElementById('in-verifier-name').value
+                vName: document.getElementById('in-verifier-name').value,
+                plusChoice: document.getElementById('in-plus').value
             }
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `호봉획정_${data.name}_20260428.json`;
+        a.download = `호봉획정_${data.name}_20260429.json`;
         a.click();
     }
 
@@ -631,6 +676,7 @@
                 document.getElementById('in-note').value = data.meta.note || "";
                 document.getElementById('in-verifier-rank').value = data.meta.vRank || "";
                 document.getElementById('in-verifier-name').value = data.meta.vName || "";
+                if(data.meta.plusChoice) document.getElementById('in-plus').value = data.meta.plusChoice;
             }
             renderCareers(); update();
         };
